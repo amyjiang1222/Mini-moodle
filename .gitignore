@@ -1,0 +1,26 @@
+# 虛擬環境
+.venv/
+venv/
+env/
+ENV/
+
+# Python 快取與測試產物
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# SQLite 資料庫與交易暫存檔
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+instance/
+
+# 本機環境變數
+.env
+.env.*
+!.env.example
