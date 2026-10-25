@@ -9,6 +9,6 @@
 | 誰接受 | 每份文件的具名審核者；待填實際人名和證據 | 使用者授權 agent 處理歧義；團隊的 Story 接受和 Sprint 承諾仍待記錄 | 第三組負責人授權 agent 判斷三項歧義；逐條正式接受紀錄仍待完成 |
 | 拒絕 / 修訂案例 | 待填真實案例 | MM-2 敘述與驗收條件衝突；已修正 Jira 敘述 | MM-2 衝突在 Challenge 關卡提出，經使用者授權後才修正來源 |
 | 時間 | 待實測 | 待實測 | 待實測 |
-| 版本連結 | 待 Waterfall 組提供 | 待審核後連結 Git 提交與 Jira 工作 | 待審核後連結 Git 提交 |
+| 版本連結 | 待 Waterfall 組提供 | [草稿 PR #1](https://github.com/amyjiang1222/Mini-moodle/pull/1)；Jira MM-2、MM-9、MM-3 已更新文字，仍待團隊審閱 | [草稿 PR #1](https://github.com/amyjiang1222/Mini-moodle/pull/1)；正式接受紀錄待補 |
 
 報告結論須在實際比較後寫；測試通過只能證明原型行為，不能代替需求接受或宣稱 AI 節省了時間。
