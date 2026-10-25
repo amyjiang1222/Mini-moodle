@@ -1,8 +1,11 @@
 {% extends "base.html" %}
-
-{% block title %}登入（尚未開放）{% endblock %}
-
+{% block title %}登入{% endblock %}
 {% block content %}
-  <h1>登入</h1>
-  <p>此頁面為模板預留位置，登入功能尚未實作。</p>
+  <div class="form-heading"><p class="workspace-role">課程入口</p><h1>登入</h1><p>使用課程帳號進入你的工作台。</p></div>
+  <form method="post" class="form-narrow entry-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="mb-3"><label class="form-label" for="username">帳號</label><input class="form-control" id="username" name="username" autocomplete="username" required></div>
+    <div class="mb-4"><label class="form-label" for="password">密碼</label><input class="form-control" id="password" name="password" type="password" autocomplete="current-password" required></div>
+    <button class="btn btn-primary" type="submit">登入</button>
+  </form>
 {% endblock %}
