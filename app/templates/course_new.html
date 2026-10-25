@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}建立課程{% endblock %}
+{% block content %}
+  <a class="back-link" href="{{ url_for('dashboard') }}">← 返回我的課程</a>
+  <div class="form-heading"><p class="workspace-role">教師工作台</p><h1>建立課程</h1><p>建立後會產生課碼，供學生加入。</p></div>
+  <form method="post" class="form-narrow entry-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="mb-3"><label class="form-label" for="course-name">課程名稱</label><input class="form-control" id="course-name" name="name" required></div>
+    <div class="mb-4"><label class="form-label" for="course-description">課程描述</label><textarea class="form-control" id="course-description" name="description"></textarea></div>
+    <button class="btn btn-primary" type="submit">建立課程</button>
+  </form>
+{% endblock %}
