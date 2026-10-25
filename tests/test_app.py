@@ -58,6 +58,12 @@ class AppStoryTests(unittest.TestCase):
         self.assertIn(".welcome-panel", css.get_data(as_text=True))
         css.close()
 
+    def test_sqlite_utc_timestamp_displays_as_taiwan_time(self):
+        formatter = self.app.jinja_env.filters["taipei_time"]
+        self.assertEqual(
+            formatter("2026-10-25 16:38:45"), "2026-10-26 00:38（台灣時間）"
+        )
+
     def test_login_roles_and_invalid_credentials(self):
         invalid = self.login(self.client, "teacher", "wrong")
         self.assertIn("帳號或密碼錯誤", invalid.get_data(as_text=True))

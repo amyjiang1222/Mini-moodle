@@ -2,6 +2,7 @@
 
 import os
 import secrets
+from datetime import datetime, timedelta, timezone
 
 from flask import Flask, abort, g, redirect, render_template, request, session, url_for
 
@@ -19,6 +20,13 @@ def create_app(test_config=None):
     if test_config is not None:
         app.config.update(test_config)
     os.makedirs(app.instance_path, exist_ok=True)
+
+    @app.template_filter("taipei_time")
+    def taipei_time(value):
+        """Display SQLite's UTC timestamp in the course's local time zone."""
+        utc_time = datetime.strptime(value, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+        local_time = utc_time.astimezone(timezone(timedelta(hours=8)))
+        return local_time.strftime("%Y-%m-%d %H:%M") + "（台灣時間）"
 
     from app.models import close_db, get_db, init_db, visible_courses
     app.teardown_appcontext(close_db)
