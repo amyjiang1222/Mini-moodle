@@ -2,22 +2,22 @@
 
 ## 專案目的
 
-本專案為軟體工程課程的 Agile + AI 期中專案，由 3 人團隊於約 2 週內開發簡化版 Moodle。
-預計功能包含教師與學生登入、教師建立課程、課程公告及課程留言板。
+本專案是軟體工程課程 Agile + AI 期中專案的 Mini Moodle 原型。
+目前功能包含教師與學生登入、教師建立課程、學生使用課碼加入課程、課程公告（教師可修改）及課程留言板。
 
-登入、建課、課碼加入、公告（含教師修改）與留言已由 [PR #1](https://github.com/amyjiang1222/Mini-moodle/pull/1) 合併到 `main`。程式與需求分析草稿可供團隊審閱；Jira 的 Story 接受、估點與 Sprint 紀錄須依實際團隊流程另行確認。
+以上功能已合併到 `main`。Jira 的 Story 接受、估點與 Sprint 紀錄須依實際團隊流程另行確認。
 
 ## 技術選擇
 
 - Python 3.9 以上版本與 Flask。
 - HTML、CSS、Bootstrap、Jinja2。
-- SQLite（後續開發時整合，可使用 Python 內建的 `sqlite3`）。
+- SQLite（使用 Python 內建的 `sqlite3`）。
 - Git。
 
 目前唯一直接依賴為 Flask；SQLite 使用 Python 內建 `sqlite3`，密碼雜湊使用 Flask 所依賴的 Werkzeug。
 Bootstrap 樣式透過 CDN 載入，需要網路連線；本機 CSS 提供基本排版，無網路時首頁仍可顯示。
 
-## 專案結構與用途
+## 主要檔案
 
 ```text
 Mini-moodle/
@@ -48,7 +48,6 @@ Mini-moodle/
 │   ├── user_stories.md      # Jira Story 核對與修訂建議
 │   ├── sprint_records.md    # 本地實際工作紀錄
 │   ├── ai_usage_log.md      # AI 使用與人工審核狀態
-│   ├── optional_agent_method.md # 第三種方法草稿
 │   └── uml/system_diagrams.md   # 類別與循序圖
 ├── config.py               # 共用設定
 ├── run.py                  # 本機啟動入口
@@ -117,4 +116,4 @@ macOS / Linux：
 
 ## 團隊文件
 
-需求、Jira 審核表、實際本地工作紀錄、AI 使用紀錄、Optional 方法與 UML 都在 `docs/`。尚未人工接受的項目均標為草稿，不能直接當成 Jira 完成紀錄。
+需求、Jira 審核表、本地工作紀錄、AI 使用紀錄與 UML 都在 `docs/`。尚未人工接受的項目仍是草稿，不能直接當成 Jira 完成紀錄。
