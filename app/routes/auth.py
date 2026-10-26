@@ -36,7 +36,7 @@ def login():
         password = request.form.get("password", "")
         user = get_db().execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
         if user is None or not check_password_hash(user["password_hash"], password):
-            flash("帳號或密碼錯誤。", "danger")
+            flash("帳號或密碼錯誤", "danger")
         else:
             session.clear()
             session["user_id"] = user["id"]

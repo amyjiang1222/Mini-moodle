@@ -2,7 +2,7 @@
 {% block title %}修改公告{% endblock %}
 {% block content %}
   <a class="back-link" href="{{ url_for('courses.detail', course_id=course['id']) }}">← 返回{{ course['name'] }}</a>
-  <div class="form-heading"><p class="workspace-role">課程公告</p><h1>修改公告</h1><p>更新後，課程成員會看到最新內容。</p></div>
+  <div class="form-heading"><h1>修改公告</h1></div>
   <form method="post" class="form-narrow entry-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <div class="mb-3"><label class="form-label" for="announcement-title">標題</label><input class="form-control" id="announcement-title" name="title" value="{{ announcement['title'] }}" required></div>

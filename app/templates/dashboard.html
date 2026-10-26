@@ -3,12 +3,12 @@
 {% block content %}
   {% if g.user %}
     <div class="workspace-heading">
-      <div><p class="workspace-role">{{ '教師工作台' if g.user['role'] == 'teacher' else '學生工作台' }}</p><h1>我的課程</h1><p>從課程進入公告與留言板。</p></div>
+      <h1>我的課程</h1>
       {% if g.user['role'] == 'teacher' %}<a class="btn btn-primary" href="{{ url_for('courses.new') }}">建立課程</a>{% endif %}
     </div>
     {% if g.user['role'] == 'student' %}
       <section class="join-strip" aria-labelledby="join-title">
-        <div><h2 id="join-title">加入課程</h2><p>向授課教師取得課碼後，在這裡輸入。</p></div>
+        <h2 id="join-title">加入課程</h2>
         <form method="post" action="{{ url_for('courses.join') }}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <label class="visually-hidden" for="course-code">課碼</label><input class="form-control" id="course-code" name="code" placeholder="例如 AB1234567" autocomplete="off" required>
@@ -23,14 +23,12 @@
           <a class="course-row" href="{{ url_for('courses.detail', course_id=course['id']) }}"><span class="course-name">{{ course['name'] }}</span><span class="course-open">查看課程 <span aria-hidden="true">›</span></span></a>
         {% endfor %}
       {% else %}
-        <div class="course-empty"><strong>目前沒有課程。</strong><p>{{ '建立第一門課程，開始發布公告。' if g.user['role'] == 'teacher' else '取得課碼後，使用上方欄位加入課程。' }}</p></div>
+        <div class="course-empty">目前沒有課程</div>
       {% endif %}
     </section>
   {% else %}
     <section class="welcome-panel" aria-labelledby="welcome-title">
-      <div class="welcome-copy"><p class="workspace-role">課程入口</p><h1 id="welcome-title">歡迎使用 Mini Moodle</h1><p>教師建立課程、發布公告；學生用課碼加入，接著在同一門課程中查看公告與留言。</p><a class="btn btn-primary" href="{{ url_for('auth.login') }}">登入查看課程</a></div>
-      <div class="welcome-steps" aria-hidden="true"><span>建立或加入課程</span><span>閱讀課程公告</span><span>在留言板討論</span></div>
+      <div class="welcome-copy"><h1 id="welcome-title">Mini Moodle</h1><p>教師建立課程與發布公告，學生用課碼加入課程並留言</p><a class="btn btn-primary" href="{{ url_for('auth.login') }}">登入</a></div>
     </section>
-    <p class="login-hint">請先登入，查看你的課程。</p>
   {% endif %}
 {% endblock %}

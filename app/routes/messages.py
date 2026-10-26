@@ -15,7 +15,7 @@ def create(course_id):
         abort(404)
     body = request.form.get("body", "").strip()
     if not body:
-        flash("留言不可空白。", "danger")
+        flash("留言不可空白", "danger")
     else:
         get_db().execute(
             "INSERT INTO messages (course_id, author_id, body) VALUES (?, ?, ?)",

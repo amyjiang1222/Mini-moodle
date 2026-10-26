@@ -10,7 +10,7 @@
   <body>
     <header class="border-bottom bg-white">
       <nav class="container py-3" aria-label="主要導覽">
-        <a class="navbar-brand fw-bold" href="{{ url_for('dashboard') }}">Mini Moodle｜迷你教學平台</a>
+        <a class="navbar-brand fw-bold" href="{{ url_for('dashboard') }}">Mini Moodle</a>
         <div class="float-end">
           {% if g.user %}
             <span class="me-2">{{ g.user['username'] }}（{{ '教師' if g.user['role'] == 'teacher' else '學生' }}）</span>
@@ -30,8 +30,5 @@
       {% endfor %}
       {% block content %}{% endblock %}
     </main>
-    <footer class="container py-4 text-secondary border-top">
-      軟體工程課程・Agile + AI 期中專案
-    </footer>
   </body>
 </html>
