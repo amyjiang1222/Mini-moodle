@@ -2,10 +2,8 @@
 
 ## 專案目的
 
-本專案是軟體工程課程 Agile + AI 期中專案的 Mini Moodle 原型。
+本專案為軟體工程課程的 Agile + AI 期中專案，由 3 人團隊於約 2 週內開發簡化版 Moodle。
 目前功能包含教師與學生登入、教師建立課程、學生使用課碼加入課程、課程公告（教師可修改）及課程留言板。
-
-以上功能已合併到 `main`。Jira 的 Story 接受、估點與 Sprint 紀錄須依實際團隊流程另行確認。
 
 ## 技術選擇
 
@@ -14,49 +12,47 @@
 - SQLite（使用 Python 內建的 `sqlite3`）。
 - Git。
 
-目前唯一直接依賴為 Flask；SQLite 使用 Python 內建 `sqlite3`，密碼雜湊使用 Flask 所依賴的 Werkzeug。
-Bootstrap 樣式透過 CDN 載入，需要網路連線；本機 CSS 提供基本排版，無網路時首頁仍可顯示。
+目前唯一直接依賴為 Flask，Jinja2 等必要套件會隨 Flask 安裝。
+Bootstrap 樣式透過 CDN 載入，需要網路連線。本機 CSS 提供基本排版。
 
-## 主要檔案
+## 專案結構與用途
 
 ```text
 Mini-moodle/
 ├── app/
 │   ├── __init__.py          # 應用程式工廠與首頁路由
-│   ├── models.py            # SQLite 結構與資料存取
+│   ├── models.py            # 資料模型與資料存取
 │   ├── routes/
 │   │   ├── __init__.py      # 功能路由套件
-│   │   ├── auth.py          # 登入與角色權限
-│   │   ├── courses.py       # 建課、加入與課程頁
-│   │   ├── announcements.py # 課程公告
-│   │   └── messages.py      # 課程留言板
+│   │   ├── auth.py          # 登入功能
+│   │   ├── courses.py       # 課程功能
+│   │   ├── announcements.py # 公告功能
+│   │   └── messages.py      # 留言板功能
 │   ├── templates/
 │   │   ├── base.html         # 共用頁面模板
-│   │   ├── login.html        # 登入頁
-│   │   ├── dashboard.html    # 首頁與課程清單
+│   │   ├── login.html        # 登入頁面
+│   │   ├── dashboard.html    # 首頁
 │   │   ├── course_new.html   # 建立課程
-│   │   ├── course_detail.html # 課程、公告與留言
-│   │   └── announcement_edit.html # 教師修改公告
+│   │   ├── course_detail.html # 課程頁面
+│   │   └── announcement_edit.html # 修改公告
 │   └── static/
 │       └── css/
 │           └── style.css    # 共用樣式
 ├── tests/
 │   ├── __init__.py
-│   └── test_app.py          # 五個 Story 的流程與權限測試
+│   └── test_app.py          # 功能測試
 ├── docs/
 │   ├── requirements.md      # 需求說明
-│   ├── user_stories.md      # Jira Story 核對與修訂建議
-│   ├── sprint_records.md    # 本地實際工作紀錄
-│   ├── ai_usage_log.md      # AI 使用與人工審核狀態
-│   └── uml/system_diagrams.md   # 類別與循序圖
+│   ├── user_stories.md      # 使用者故事
+│   ├── sprint_records.md    # 工作紀錄
+│   ├── ai_usage_log.md      # AI 使用紀錄
+│   └── uml/system_diagrams.md   # UML 圖
 ├── config.py               # 共用設定
 ├── run.py                  # 本機啟動入口
 ├── requirements.txt        # Python 直接依賴
 ├── .gitignore              # 排除本機環境、快取、資料庫及機密設定
 └── README.md
 ```
-
-本地原型使用 Flask Blueprint 實作上述流程。帳號由管理者在本機建立，沒有公開註冊頁；請使用虛構展示帳號。
 
 ## 安裝環境
 
@@ -67,8 +63,6 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-直接使用虛擬環境的 Python，不需要啟用腳本或調整 PowerShell 執行原則。
-
 macOS / Linux 可使用：
 
 ```bash
@@ -77,6 +71,20 @@ python3 -m venv .venv
 ```
 
 ## 啟動方式
+
+先建立帳號，執行兩次並分別選擇 `teacher` 和 `student`：
+
+Windows PowerShell：
+
+```powershell
+.\.venv\Scripts\flask.exe --app run.py create-user
+```
+
+macOS / Linux：
+
+```bash
+.venv/bin/flask --app run.py create-user
+```
 
 Windows PowerShell：
 
@@ -90,13 +98,7 @@ macOS / Linux：
 .venv/bin/python run.py
 ```
 
-先建立虛構展示帳號：
-
-```powershell
-.\.venv\Scripts\flask.exe --app run.py create-user
-```
-
-依提示建立至少一名 `teacher` 和一名 `student`。資料庫會自動建立在 `instance/mini_moodle.sqlite3`，並由 `.gitignore` 排除。開啟 <http://127.0.0.1:5000/>，登入後可建立課程並用課碼加入。按 `Ctrl+C` 停止。此啟動方式使用 Flask 本機開發伺服器；`MINI_MOODLE_SECRET_KEY` 可設定固定的本機 session 金鑰。
+資料庫會建立在 `instance/mini_moodle.sqlite3`。開啟 <http://127.0.0.1:5000/> 登入，按 `Ctrl+C` 停止伺服器。
 
 ## 執行測試
 
@@ -112,8 +114,6 @@ macOS / Linux：
 .venv/bin/python -m unittest discover -s tests -v
 ```
 
-測試使用 Python 內建 `unittest` 與 Flask 測試用戶端，檢查登入、角色限制、課碼格式與加入、無效與重複課碼、公告發布及修改權限、留言、非成員存取和空白輸入；不需要額外測試套件。
-
 ## 團隊文件
 
-需求、Jira 審核表、本地工作紀錄、AI 使用紀錄與 UML 都在 `docs/`。尚未人工接受的項目仍是草稿，不能直接當成 Jira 完成紀錄。
+需求、使用者故事、工作紀錄、AI 使用紀錄與 UML 圖位於 `docs/`。
