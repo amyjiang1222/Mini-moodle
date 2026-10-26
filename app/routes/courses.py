@@ -17,7 +17,7 @@ def new():
         name = request.form.get("name", "").strip()
         description = request.form.get("description", "").strip()
         if not name:
-            flash("課程名稱不可空白。", "danger")
+            flash("課程名稱不可空白", "danger")
         else:
             course_id = create_course(name, description, g.user["id"])
             return redirect(url_for("courses.detail", course_id=course_id))
@@ -32,7 +32,7 @@ def join():
     code = request.form.get("code", "").strip().upper()
     course = get_db().execute("SELECT id FROM courses WHERE code = ?", (code,)).fetchone()
     if course is None:
-        flash("找不到這個課碼。", "danger")
+        flash("找不到這個課碼", "danger")
         return redirect(url_for("dashboard"))
     try:
         get_db().execute(
@@ -41,7 +41,7 @@ def join():
         )
         get_db().commit()
     except sqlite3.IntegrityError:
-        flash("你已加入這門課程。", "info")
+        flash("你已加入這門課程", "info")
     return redirect(url_for("courses.detail", course_id=course["id"]))
 
 

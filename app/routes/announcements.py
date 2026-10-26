@@ -16,7 +16,7 @@ def create(course_id):
     title = request.form.get("title", "").strip()
     body = request.form.get("body", "").strip()
     if not title or not body:
-        flash("公告標題與內容不可空白。", "danger")
+        flash("公告標題與內容不可空白", "danger")
     else:
         get_db().execute(
             "INSERT INTO announcements (course_id, teacher_id, title, body) VALUES (?, ?, ?, ?)",
@@ -43,13 +43,13 @@ def edit(course_id, announcement_id):
         title = request.form.get("title", "").strip()
         body = request.form.get("body", "").strip()
         if not title or not body:
-            flash("公告標題與內容不可空白。", "danger")
+            flash("公告標題與內容不可空白", "danger")
         else:
             db.execute(
                 "UPDATE announcements SET title = ?, body = ? WHERE id = ?",
                 (title, body, announcement_id),
             )
             db.commit()
-            flash("公告已更新。", "success")
+            flash("公告已更新", "success")
             return redirect(url_for("courses.detail", course_id=course_id))
     return render_template("announcement_edit.html", course=course, announcement=announcement)

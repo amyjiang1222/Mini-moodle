@@ -2,7 +2,7 @@
 {% block title %}{{ course['name'] }}{% endblock %}
 {% block content %}
   <a class="back-link" href="{{ url_for('dashboard') }}">← 返回我的課程</a>
-  <div class="course-heading"><p class="workspace-role">課程</p><h1>{{ course['name'] }}</h1>{% if course['description'] %}<p>{{ course['description'] }}</p>{% endif %}
+  <div class="course-heading"><h1>{{ course['name'] }}</h1>{% if course['description'] %}<p>{{ course['description'] }}</p>{% endif %}
   {% if g.user['role'] == 'teacher' %}<div class="course-code">分享給學生的課碼：<strong>{{ course['code'] }}</strong></div>{% endif %}</div>
 
   <section class="course-section" aria-labelledby="announcements-title">
@@ -17,7 +17,7 @@
     {% endif %}
     {% for announcement in announcements %}
       <article class="content-item"><h3>{{ announcement['title'] }}</h3><p class="preserve-lines">{{ announcement['body'] }}</p><small>{{ announcement['author'] }}｜{{ announcement['created_at']|taipei_time }}</small>{% if g.user['role'] == 'teacher' %}<a class="item-action" href="{{ url_for('announcements.edit', course_id=course['id'], announcement_id=announcement['id']) }}">修改公告</a>{% endif %}</article>
-    {% else %}<p class="section-empty">尚無公告。</p>{% endfor %}
+    {% else %}<p class="section-empty">尚無公告</p>{% endfor %}
   </section>
 
   <section class="course-section" aria-labelledby="messages-title">
@@ -29,6 +29,6 @@
     </form>
     {% for message in messages %}
       <article class="content-item"><p class="preserve-lines">{{ message['body'] }}</p><small>{{ message['author'] }}｜{{ message['created_at']|taipei_time }}</small></article>
-    {% else %}<p class="section-empty">尚無留言。</p>{% endfor %}
+    {% else %}<p class="section-empty">尚無留言</p>{% endfor %}
   </section>
 {% endblock %}

@@ -2,7 +2,7 @@
 {% block title %}建立課程{% endblock %}
 {% block content %}
   <a class="back-link" href="{{ url_for('dashboard') }}">← 返回我的課程</a>
-  <div class="form-heading"><p class="workspace-role">教師工作台</p><h1>建立課程</h1><p>建立後會產生課碼，供學生加入。</p></div>
+  <div class="form-heading"><h1>建立課程</h1></div>
   <form method="post" class="form-narrow entry-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <div class="mb-3"><label class="form-label" for="course-name">課程名稱</label><input class="form-control" id="course-name" name="name" required></div>
