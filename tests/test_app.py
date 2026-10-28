@@ -187,3 +187,72 @@ class AppStoryTests(unittest.TestCase):
         other = self.app.test_client()
         self.login(other, "other-teacher", "other-pass")
         self.assertEqual(other.get(edit_url).status_code, 404)
+
+    def assignment_count(self):
+        with self.app.app_context():
+            return get_db().execute("SELECT count(*) FROM assignments").fetchone()[0]
+
+    def test_teacher_creates_assignment_and_student_sees_it(self):
+        course_id = self.create_course()
+        detail_url = f"/courses/{course_id}"
+        with self.app.app_context():
+            code = get_db().execute(
+                "SELECT code FROM courses WHERE id = ?", (course_id,)
+            ).fetchone()["code"]
+        due = datetime.now(TAIPEI) + timedelta(days=7)
+        created = self.client.post(f"{detail_url}/assignments", data={
+            "title": "期中報告", "description": "繳交需求文件",
+            "due_at": due.strftime("%Y-%m-%dT%H:%M"), "csrf_token": self.csrf(self.client)
+        }, follow_redirects=True)
+        html = created.get_data(as_text=True)
+        self.assertIn("期中報告", html)
+        self.assertIn("繳交需求文件", html)
+        self.assertIn(due.strftime("%Y-%m-%d %H:%M") + "（台灣時間）", html)
+        self.assertEqual(self.assignment_count(), 1)
+
+        student = self.app.test_client()
+        self.login(student, "student", "student-pass")
+        student.post("/courses/join", data={"code": code, "csrf_token": self.csrf(student)})
+        student_html = student.get(detail_url).get_data(as_text=True)
+        self.assertIn("期中報告", student_html)
+        self.assertNotIn("建立作業</button>", student_html)
+        self.assertEqual(student.post(f"{detail_url}/assignments", data={
+            "title": "學生作業", "due_at": due.strftime("%Y-%m-%dT%H:%M"),
+            "csrf_token": self.csrf(student)
+        }).status_code, 403)
+
+        other = self.app.test_client()
+        self.login(other, "other-teacher", "other-pass")
+        self.assertEqual(other.post(f"{detail_url}/assignments", data={
+            "title": "偽作業", "due_at": due.strftime("%Y-%m-%dT%H:%M"),
+            "csrf_token": self.csrf(other)
+        }).status_code, 404)
+        self.assertEqual(self.assignment_count(), 1)
+
+    def test_assignment_requires_title_and_future_deadline(self):
+        course_id = self.create_course()
+        url = f"/courses/{course_id}/assignments"
+        future = (datetime.now(TAIPEI) + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M")
+        past = (datetime.now(TAIPEI) - timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M")
+        cases = [
+            ({"title": "  ", "due_at": future}, "作業標題與截止時間不可空白"),
+            ({"title": "期中報告", "due_at": ""}, "作業標題與截止時間不可空白"),
+            ({"title": "期中報告", "due_at": "明天"}, "截止時間格式不正確"),
+            ({"title": "期中報告", "due_at": past}, "截止時間不可早於現在"),
+        ]
+        for data, message in cases:
+            response = self.client.post(url, data={
+                **data, "csrf_token": self.csrf(self.client)
+            }, follow_redirects=True)
+            self.assertIn(message, response.get_data(as_text=True))
+        self.assertEqual(self.assignment_count(), 0)
+
+        now = datetime(2026, 11, 5, 15, 59, tzinfo=timezone.utc)
+        with self.app.app_context():
+            assignment_id = create_assignment(course_id, "邊界", "", "2026-11-05T23:59", now=now)
+            due_at = get_db().execute(
+                "SELECT due_at FROM assignments WHERE id = ?", (assignment_id,)
+            ).fetchone()["due_at"]
+            self.assertEqual(due_at, "2026-11-05 15:59:00")
+            with self.assertRaisesRegex(ValueError, "截止時間不可早於現在"):
+                create_assignment(course_id, "太晚", "", "2026-11-05T23:58", now=now)
