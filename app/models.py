@@ -1,8 +1,10 @@
 """Small SQLite data layer for the agreed Jira stories."""
 
+import os
 import secrets
 import sqlite3
 import string
+import uuid
 from datetime import datetime, timedelta, timezone
 
 from flask import current_app, g
@@ -51,6 +53,15 @@ CREATE TABLE IF NOT EXISTS assignments (
     description TEXT NOT NULL DEFAULT '',
     due_at TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS submissions (
+    id INTEGER PRIMARY KEY,
+    assignment_id INTEGER NOT NULL REFERENCES assignments(id),
+    student_id INTEGER NOT NULL REFERENCES users(id),
+    original_name TEXT NOT NULL,
+    stored_name TEXT NOT NULL,
+    submitted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (assignment_id, student_id)
 );
 """
 
