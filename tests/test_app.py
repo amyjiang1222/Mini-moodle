@@ -1,5 +1,6 @@
 """End-to-end checks for the agreed Mini Moodle user stories."""
 
+import io
 import re
 import tempfile
 import unittest
@@ -7,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from app import create_app
-from app.models import TAIPEI, create_assignment, create_user, get_db
+from app.models import TAIPEI, create_assignment, create_user, get_db, past_due
 
 
 class AppStoryTests(unittest.TestCase):
@@ -257,3 +258,122 @@ class AppStoryTests(unittest.TestCase):
             self.assertEqual(due_at, "2026-11-05 15:59:00")
             with self.assertRaisesRegex(ValueError, "截止時間不可早於現在"):
                 create_assignment(course_id, "太晚", "", "2026-11-05T23:58", now=now)
+
+    def enrolled_assignment(self, due_at):
+        course_id = self.create_course()
+        with self.app.app_context():
+            db = get_db()
+            code = db.execute("SELECT code FROM courses WHERE id = ?", (course_id,)).fetchone()["code"]
+            assignment_id = db.execute(
+                "INSERT INTO assignments (course_id, title, due_at) VALUES (?, ?, ?)",
+                (course_id, "期中報告", due_at.strftime("%Y-%m-%d %H:%M:%S")),
+            ).lastrowid
+            db.commit()
+        student = self.app.test_client()
+        self.login(student, "student", "student-pass")
+        student.post("/courses/join", data={"code": code, "csrf_token": self.csrf(student)})
+        return course_id, assignment_id, code, student
+
+    def upload(self, client, url, content, filename):
+        return client.post(f"{url}/submission", data={
+            "file": (io.BytesIO(content), filename), "csrf_token": self.csrf(client)
+        }, content_type="multipart/form-data", follow_redirects=True)
+
+    def submission_rows(self):
+        with self.app.app_context():
+            return get_db().execute("SELECT * FROM submissions").fetchall()
+
+    def uploaded_files(self):
+        return list(Path(self.app.config["UPLOAD_FOLDER"]).iterdir())
+
+    def test_student_submits_and_resubmits_before_deadline(self):
+        course_id, assignment_id, _code, student = self.enrolled_assignment(
+            datetime.now(timezone.utc) + timedelta(days=1)
+        )
+        url = f"/courses/{course_id}/assignments/{assignment_id}"
+        self.assertIn("未繳交", student.get(f"/courses/{course_id}").get_data(as_text=True))
+        self.assertIn("未繳交", student.get(url).get_data(as_text=True))
+
+        html = self.upload(student, url, b"first", "report.pdf").get_data(as_text=True)
+        self.assertIn("已繳交", html)
+        self.assertIn("report.pdf", html)
+        self.assertIn("繳交時間", html)
+        self.assertIn("重新繳交</button>", html)
+        self.assertIn("已繳交", student.get(f"/courses/{course_id}").get_data(as_text=True))
+
+        self.upload(student, url, b"second", "第二版.txt")
+        rows = self.submission_rows()
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["original_name"], "第二版.txt")
+        self.assertEqual(len(self.uploaded_files()), 1)
+        download = student.get(f"{url}/submission")
+        self.assertEqual(download.data, b"second")
+        self.assertIn("attachment", download.headers["Content-Disposition"])
+        download.close()
+
+        self.assertNotIn("繳交</button>", self.client.get(url).get_data(as_text=True))
+        self.assertEqual(self.client.post(f"{url}/submission", data={
+            "csrf_token": self.csrf(self.client)
+        }).status_code, 403)
+
+    def test_invalid_or_late_submission_creates_nothing(self):
+        course_id, assignment_id, _code, student = self.enrolled_assignment(
+            datetime.now(timezone.utc) + timedelta(days=1)
+        )
+        url = f"/courses/{course_id}/assignments/{assignment_id}"
+        cases = [
+            (b"x", "virus.exe", "只接受 pdf、docx、zip、txt 檔案"),
+            (b"x", "", "請選擇要繳交的檔案"),
+            (b"x" * (120 * 1024), "big.pdf", "檔案超過 100 KB"),
+            (b"x" * (300 * 1024), "huge.pdf", "檔案超過 100 KB"),
+        ]
+        for content, filename, message in cases:
+            self.assertIn(message, self.upload(student, url, content, filename).get_data(as_text=True))
+        self.assertEqual(self.submission_rows(), [])
+        self.assertEqual(self.uploaded_files(), [])
+
+        with self.app.app_context():
+            db = get_db()
+            db.execute("UPDATE assignments SET due_at = ? WHERE id = ?", (
+                (datetime.now(timezone.utc) - timedelta(minutes=1)).strftime("%Y-%m-%d %H:%M:%S"),
+                assignment_id,
+            ))
+            db.commit()
+            assignment = db.execute("SELECT * FROM assignments WHERE id = ?", (assignment_id,)).fetchone()
+        closed_html = student.get(url).get_data(as_text=True)
+        self.assertIn("已截止", closed_html)
+        self.assertNotIn("繳交</button>", closed_html)
+        self.assertIn("已截止", student.get(f"/courses/{course_id}").get_data(as_text=True))
+        self.assertIn("已截止", self.upload(student, url, b"late", "late.pdf").get_data(as_text=True))
+        self.assertEqual(self.submission_rows(), [])
+        self.assertEqual(self.uploaded_files(), [])
+
+        due = datetime.strptime(assignment["due_at"], "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+        self.assertFalse(past_due(assignment, now=due))
+        self.assertTrue(past_due(assignment, now=due + timedelta(seconds=1)))
+
+    def test_submissions_are_private_to_enrolled_owner(self):
+        course_id, assignment_id, code, student = self.enrolled_assignment(
+            datetime.now(timezone.utc) + timedelta(days=1)
+        )
+        url = f"/courses/{course_id}/assignments/{assignment_id}"
+        self.upload(student, url, b"mine", "my-report.pdf")
+
+        outsider = self.app.test_client()
+        self.login(outsider, "outsider", "outsider-pass")
+        self.assertEqual(outsider.get(url).status_code, 404)
+        self.assertEqual(outsider.get(f"{url}/submission").status_code, 404)
+        self.assertEqual(outsider.post(f"{url}/submission", data={
+            "file": (io.BytesIO(b"x"), "x.pdf"), "csrf_token": self.csrf(outsider)
+        }, content_type="multipart/form-data").status_code, 404)
+
+        with self.app.app_context():
+            create_user("classmate", "classmate-pass", "student")
+        classmate = self.app.test_client()
+        self.login(classmate, "classmate", "classmate-pass")
+        classmate.post("/courses/join", data={"code": code, "csrf_token": self.csrf(classmate)})
+        classmate_html = classmate.get(url).get_data(as_text=True)
+        self.assertNotIn("my-report.pdf", classmate_html)
+        self.assertIn("未繳交", classmate_html)
+        self.assertEqual(classmate.get(f"{url}/submission").status_code, 404)
+        self.assertEqual(len(self.submission_rows()), 1)

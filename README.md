@@ -3,7 +3,7 @@
 ## 專案目的
 
 本專案為軟體工程課程的 Agile + AI 期中專案，由 3 人團隊於約 2 週內開發簡化版 Moodle。
-目前功能包含教師與學生登入、教師建立課程、學生使用課碼加入課程、課程公告（教師可修改）、教師建立作業及課程留言板。
+目前功能包含教師與學生登入、教師建立課程、學生使用課碼加入課程、課程公告（教師可修改）、教師建立作業、學生上傳作業檔案及課程留言板。
 
 ## 技術選擇
 
@@ -35,6 +35,7 @@ Mini-moodle/
 │   │   ├── dashboard.html    # 首頁
 │   │   ├── course_new.html   # 建立課程
 │   │   ├── course_detail.html # 課程頁面
+│   │   ├── assignment_detail.html # 作業頁面與繳交
 │   │   └── announcement_edit.html # 修改公告
 │   └── static/
 │       └── css/
@@ -99,7 +100,7 @@ macOS / Linux：
 .venv/bin/python run.py
 ```
 
-資料庫會建立在 `instance/mini_moodle.sqlite3`。開啟 <http://127.0.0.1:5000/> 登入，按 `Ctrl+C` 停止伺服器。
+資料庫會建立在 `instance/mini_moodle.sqlite3`，學生上傳的作業檔案存放在 `instance/uploads/`。開啟 <http://127.0.0.1:5000/> 登入，按 `Ctrl+C` 停止伺服器。
 
 ## 執行測試
 

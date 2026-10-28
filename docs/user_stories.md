@@ -10,6 +10,7 @@
 | MM-7 公告 | [MM-3](https://jiangguancih42173217amy.atlassian.net/browse/MM-3) | 該課教師發布及修改公告，學生可查看但不能修改 | `app/routes/announcements.py` |
 | MM-8 留言 | [MM-4](https://jiangguancih42173217amy.atlassian.net/browse/MM-4) | 課程成員留言、查看發言者與內容，禁止空白留言 | `app/routes/messages.py` |
 | 作業 | 建立作業 | 該課教師建立作業：標題與截止時間必填、截止時間不可早於現在，已加入的學生可查看，學生不可建立 | `app/routes/assignments.py` |
+| 作業 | 繳交作業 | 已加入的學生在截止前上傳 pdf、docx、zip、txt 檔案（上限 100 KB），可重新繳交且只保留最新一次，只能看到自己的繳交 | `app/routes/assignments.py` |
 
 ## 已處理的需求歧義與仍待團隊核對的範圍
 
