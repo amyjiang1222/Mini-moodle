@@ -9,6 +9,7 @@
 | MM-6 課程 | [MM-9](https://jiangguancih42173217amy.atlassian.net/browse/MM-9) | 學生輸入課碼後加入並查看課程內容 | `app/routes/courses.py` |
 | MM-7 公告 | [MM-3](https://jiangguancih42173217amy.atlassian.net/browse/MM-3) | 該課教師發布及修改公告，學生可查看但不能修改 | `app/routes/announcements.py` |
 | MM-8 留言 | [MM-4](https://jiangguancih42173217amy.atlassian.net/browse/MM-4) | 課程成員留言、查看發言者與內容，禁止空白留言 | `app/routes/messages.py` |
+| 作業 | 建立作業 | 該課教師建立作業：標題與截止時間必填、截止時間不可早於現在，已加入的學生可查看，學生不可建立 | `app/routes/assignments.py` |
 
 ## 已處理的需求歧義與仍待團隊核對的範圍
 
@@ -20,4 +21,4 @@
 
 ## 本地驗收結果與限制
 
-`python -m unittest discover -s tests -v` 的整合測試涵蓋五個故事的主要成功與拒絕路徑。這是本地原型驗證，**不代表** Product Owner 已接受故事，也不代表 Jira 已進入進行中或完成。
+`python -m unittest discover -s tests -v` 的整合測試涵蓋各故事的主要成功與拒絕路徑。這是本地原型驗證，**不代表** Product Owner 已接受故事，也不代表 Jira 已進入進行中或完成。
