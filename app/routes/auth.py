@@ -44,6 +44,11 @@ def login():
     return render_template("login.html")
 
 
+@bp.get("/register")
+def register():
+    return render_template("register.html")
+
+
 @bp.post("/logout")
 @login_required
 def logout():

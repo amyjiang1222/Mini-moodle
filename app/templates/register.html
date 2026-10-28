@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}註冊帳號{% endblock %}
+{% block content %}
+  <div class="form-heading"><h1>註冊帳號</h1></div>
+  <form method="post" class="form-narrow entry-form" onsubmit="return false">
+    <div class="mb-3">
+      <label class="form-label" for="username">使用者名稱</label>
+      <input class="form-control" id="username" name="username" autocomplete="username" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="password">密碼</label>
+      <input class="form-control" id="password" name="password" type="password" autocomplete="new-password" aria-describedby="password-hint" required>
+      <div class="form-text" id="password-hint">6–20 位，至少包含一個英文字母與一個數字</div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="confirm-password">確認密碼</label>
+      <input class="form-control" id="confirm-password" name="confirm_password" type="password" autocomplete="new-password" required>
+    </div>
+    <fieldset class="mb-4">
+      <legend class="form-label fs-6">身分</legend>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" id="role-student" name="role" type="radio" value="student" required>
+        <label class="form-check-label" for="role-student">學生</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" id="role-teacher" name="role" type="radio" value="teacher" required>
+        <label class="form-check-label" for="role-teacher">教師</label>
+      </div>
+    </fieldset>
+    <button class="btn btn-primary" type="button" disabled>註冊</button>
+    <a class="ms-3" href="{{ url_for('auth.login') }}">返回登入</a>
+  </form>
+{% endblock %}
