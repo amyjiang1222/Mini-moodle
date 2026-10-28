@@ -45,6 +45,15 @@ def join():
     return redirect(url_for("courses.detail", course_id=course["id"]))
 
 
+@bp.get("/courses/<int:course_id>/members")
+@login_required
+def members(course_id):
+    course = accessible_course(course_id, g.user)
+    if course is None:
+        abort(404)
+    return render_template("course_members.html", course=course)
+
+
 @bp.get("/courses/<int:course_id>")
 @login_required
 def detail(course_id):

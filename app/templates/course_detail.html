@@ -5,6 +5,8 @@
   <div class="course-heading"><h1>{{ course['name'] }}</h1>{% if course['description'] %}<p>{{ course['description'] }}</p>{% endif %}
   {% if g.user['role'] == 'teacher' %}<div class="course-code">分享給學生的課碼：<strong>{{ course['code'] }}</strong></div>{% endif %}</div>
 
+  <a class="btn btn-outline-primary mb-4" href="{{ url_for('courses.members', course_id=course['id']) }}">課程成員</a>
+
   <section class="course-section" aria-labelledby="announcements-title">
     <h2 id="announcements-title">公告</h2>
     {% if g.user['role'] == 'teacher' %}

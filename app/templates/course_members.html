@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}課程成員｜{{ course['name'] }}{% endblock %}
+{% block content %}
+  <a class="back-link" href="{{ url_for('courses.detail', course_id=course['id']) }}">← 返回課程</a>
+  <div class="course-heading">
+    <h1>課程成員</h1>
+    <p>{{ course['name'] }}</p>
+  </div>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <caption class="visually-hidden">{{ course['name'] }}的課程成員</caption>
+      <thead>
+        <tr>
+          <th scope="col">成員名稱</th>
+          <th scope="col">身分</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="section-empty" colspan="2">尚無成員</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
