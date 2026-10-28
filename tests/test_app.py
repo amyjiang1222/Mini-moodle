@@ -17,6 +17,7 @@ class AppStoryTests(unittest.TestCase):
             "TESTING": True,
             "SECRET_KEY": "test-only-secret",
             "DATABASE": str(Path(self.tempdir.name) / "test.sqlite3"),
+            "UPLOAD_FOLDER": str(Path(self.tempdir.name) / "uploads"),
         })
         self.client = self.app.test_client()
         with self.app.app_context():

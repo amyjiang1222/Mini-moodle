@@ -58,7 +58,10 @@ def detail(course_id):
         (course_id,),
     ).fetchall()
     assignments = db.execute(
-        "SELECT * FROM assignments WHERE course_id = ? ORDER BY due_at, id", (course_id,)
+        "SELECT a.*, s.submitted_at, a.due_at < datetime('now') AS closed FROM assignments a "
+        "LEFT JOIN submissions s ON s.assignment_id = a.id AND s.student_id = ? "
+        "WHERE a.course_id = ? ORDER BY a.due_at, a.id",
+        (g.user["id"], course_id),
     ).fetchall()
     messages = db.execute(
         "SELECT m.*, u.username AS author FROM messages m "

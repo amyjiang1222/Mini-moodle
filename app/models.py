@@ -149,6 +149,69 @@ def create_assignment(course_id, title, description, due_input, now=None):
     return cursor.lastrowid
 
 
+def course_assignment(course_id, assignment_id):
+    return get_db().execute(
+        "SELECT * FROM assignments WHERE id = ? AND course_id = ?", (assignment_id, course_id)
+    ).fetchone()
+
+
+def past_due(assignment, now=None):
+    due = datetime.strptime(assignment["due_at"], "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+    return (now or datetime.now(timezone.utc)) > due
+
+
+def own_submission(assignment_id, student_id):
+    return get_db().execute(
+        "SELECT * FROM submissions WHERE assignment_id = ? AND student_id = ?",
+        (assignment_id, student_id),
+    ).fetchone()
+
+
+def upload_limit_message():
+    return f"檔案超過 {current_app.config['MAX_UPLOAD_BYTES'] // 1024} KB"
+
+
+def submit_assignment(assignment, student_id, upload, now=None):
+    """Validate before writing anything; a resubmission replaces the student's only record."""
+    if past_due(assignment, now):
+        raise ValueError("已截止")
+    original_name = (upload.filename or "").replace("\\", "/").rsplit("/", 1)[-1].strip() if upload else ""
+    if not original_name:
+        raise ValueError("請選擇要繳交的檔案")
+    extension = original_name.rsplit(".", 1)[-1].lower() if "." in original_name else ""
+    allowed = current_app.config["ALLOWED_EXTENSIONS"]
+    if extension not in allowed:
+        raise ValueError("只接受 " + "、".join(allowed) + " 檔案")
+    upload.stream.seek(0, os.SEEK_END)
+    size = upload.stream.tell()
+    upload.stream.seek(0)
+    if size > current_app.config["MAX_UPLOAD_BYTES"]:
+        raise ValueError(upload_limit_message())
+
+    folder = current_app.config["UPLOAD_FOLDER"]
+    stored_name = f"{uuid.uuid4().hex}.{extension}"
+    upload.save(os.path.join(folder, stored_name))
+    previous = own_submission(assignment["id"], student_id)
+    db = get_db()
+    try:
+        db.execute(
+            "INSERT INTO submissions (assignment_id, student_id, original_name, stored_name) "
+            "VALUES (?, ?, ?, ?) ON CONFLICT (assignment_id, student_id) DO UPDATE SET "
+            "original_name = excluded.original_name, stored_name = excluded.stored_name, "
+            "submitted_at = CURRENT_TIMESTAMP",
+            (assignment["id"], student_id, original_name, stored_name),
+        )
+        db.commit()
+    except Exception:
+        os.remove(os.path.join(folder, stored_name))
+        raise
+    if previous is not None:
+        try:
+            os.remove(os.path.join(folder, previous["stored_name"]))
+        except FileNotFoundError:
+            pass
+
+
 def visible_courses(user):
     db = get_db()
     if user["role"] == "teacher":

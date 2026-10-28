@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ assignment['title'] }}{% endblock %}
+{% block content %}
+  <a class="back-link" href="{{ url_for('courses.detail', course_id=course['id']) }}">← 返回{{ course['name'] }}</a>
+  <div class="course-heading"><h1>{{ assignment['title'] }}</h1>{% if assignment['description'] %}<p class="preserve-lines">{{ assignment['description'] }}</p>{% endif %}
+  <div class="course-code">截止：{{ assignment['due_at']|taipei_time }}{% if closed %}｜已截止{% endif %}</div></div>
+
+  {% if g.user['role'] == 'student' %}
+    <section class="course-section" aria-labelledby="submission-title">
+      <h2 id="submission-title">我的繳交</h2>
+      {% if submission %}
+        <article class="content-item"><p>已繳交</p><a href="{{ url_for('assignments.download', course_id=course['id'], assignment_id=assignment['id']) }}">{{ submission['original_name'] }}</a><br><small>繳交時間：{{ submission['submitted_at']|taipei_time }}</small></article>
+      {% else %}
+        <p class="section-empty">未繳交</p>
+      {% endif %}
+      {% if not closed %}
+        <form method="post" action="{{ url_for('assignments.submit', course_id=course['id'], assignment_id=assignment['id']) }}" enctype="multipart/form-data" class="composer">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <div class="mb-3"><label class="form-label" for="submission-file">作業檔案</label><input class="form-control" id="submission-file" name="file" type="file" accept="{% for ext in allowed_extensions %}.{{ ext }}{% if not loop.last %},{% endif %}{% endfor %}" required><div class="form-text">接受 {{ allowed_extensions|join('、') }}，上限 {{ max_upload_kb }} KB</div></div>
+          <button class="btn btn-primary" type="submit">{{ '重新繳交' if submission else '繳交' }}</button>
+        </form>
+      {% endif %}
+    </section>
+  {% endif %}
+{% endblock %}
