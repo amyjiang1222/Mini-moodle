@@ -3,10 +3,11 @@
 import re
 import tempfile
 import unittest
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from app import create_app
-from app.models import create_user, get_db
+from app.models import TAIPEI, create_assignment, create_user, get_db
 
 
 class AppStoryTests(unittest.TestCase):

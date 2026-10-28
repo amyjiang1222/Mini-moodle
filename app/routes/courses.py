@@ -57,11 +57,18 @@ def detail(course_id):
         "JOIN users u ON u.id = a.teacher_id WHERE a.course_id = ? ORDER BY a.id DESC",
         (course_id,),
     ).fetchall()
+    assignments = db.execute(
+        "SELECT * FROM assignments WHERE course_id = ? ORDER BY due_at, id", (course_id,)
+    ).fetchall()
     messages = db.execute(
         "SELECT m.*, u.username AS author FROM messages m "
         "JOIN users u ON u.id = m.author_id WHERE m.course_id = ? ORDER BY m.id DESC",
         (course_id,),
     ).fetchall()
     return render_template(
-        "course_detail.html", course=course, announcements=announcements, messages=messages
+        "course_detail.html",
+        course=course,
+        announcements=announcements,
+        assignments=assignments,
+        messages=messages,
     )
