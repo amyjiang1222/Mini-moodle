@@ -32,7 +32,7 @@
       </form>
     {% endif %}
     {% for assignment in assignments %}
-      <article class="content-item"><h3>{{ assignment['title'] }}</h3>{% if assignment['description'] %}<p class="preserve-lines">{{ assignment['description'] }}</p>{% endif %}<small>截止：{{ assignment['due_at']|taipei_time }}</small></article>
+      <article class="content-item"><h3><a href="{{ url_for('assignments.detail', course_id=course['id'], assignment_id=assignment['id']) }}">{{ assignment['title'] }}</a></h3>{% if assignment['description'] %}<p class="preserve-lines">{{ assignment['description'] }}</p>{% endif %}<small>截止：{{ assignment['due_at']|taipei_time }}{% if g.user['role'] == 'student' %}｜{% if assignment['submitted_at'] %}已繳交{% elif assignment['closed'] %}已截止{% else %}未繳交{% endif %}{% endif %}</small></article>
     {% else %}<p class="section-empty">尚無作業</p>{% endfor %}
   </section>
 
