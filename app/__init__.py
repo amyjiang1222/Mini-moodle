@@ -4,9 +4,9 @@ import os
 import secrets
 from datetime import datetime, timezone
 
-from flask import Flask, abort, g, redirect, render_template, request, session, url_for
+from flask import Flask, abort, flash, g, redirect, render_template, request, session, url_for
 
-from app.models import TAIPEI
+from app.models import TAIPEI, upload_limit_message
 from config import Config
 
 
@@ -16,11 +16,13 @@ def create_app(test_config=None):
     app.config.from_object(Config)
     app.config.update(
         DATABASE=os.path.join(app.instance_path, "mini_moodle.sqlite3"),
+        UPLOAD_FOLDER=os.path.join(app.instance_path, "uploads"),
         SECRET_KEY=os.environ.get("MINI_MOODLE_SECRET_KEY") or secrets.token_hex(32),
     )
     if test_config is not None:
         app.config.update(test_config)
     os.makedirs(app.instance_path, exist_ok=True)
+    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
     @app.template_filter("taipei_time")
     def taipei_time(value):
