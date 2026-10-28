@@ -2,10 +2,11 @@
 
 import os
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from flask import Flask, abort, g, redirect, render_template, request, session, url_for
 
+from app.models import TAIPEI
 from config import Config
 
 
@@ -25,7 +26,7 @@ def create_app(test_config=None):
     def taipei_time(value):
         """Display SQLite's UTC timestamp in the course's local time zone."""
         utc_time = datetime.strptime(value, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
-        local_time = utc_time.astimezone(timezone(timedelta(hours=8)))
+        local_time = utc_time.astimezone(TAIPEI)
         return local_time.strftime("%Y-%m-%d %H:%M") + "（台灣時間）"
 
     from app.models import close_db, get_db, init_db, visible_courses
@@ -63,10 +64,12 @@ def create_app(test_config=None):
     from app.routes.courses import bp as courses_bp
     from app.routes.announcements import bp as announcements_bp
     from app.routes.messages import bp as messages_bp
+    from app.routes.assignments import bp as assignments_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(courses_bp)
     app.register_blueprint(announcements_bp)
     app.register_blueprint(messages_bp)
+    app.register_blueprint(assignments_bp)
 
     @app.cli.command("create-user")
     def create_user_command():
