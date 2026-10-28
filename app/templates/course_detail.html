@@ -20,6 +20,22 @@
     {% else %}<p class="section-empty">尚無公告</p>{% endfor %}
   </section>
 
+  <section class="course-section" aria-labelledby="assignments-title">
+    <h2 id="assignments-title">作業</h2>
+    {% if g.user['role'] == 'teacher' %}
+      <form method="post" action="{{ url_for('assignments.create', course_id=course['id']) }}" class="composer">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <div class="mb-3"><label class="form-label" for="assignment-title">標題</label><input class="form-control" id="assignment-title" name="title" required></div>
+        <div class="mb-3"><label class="form-label" for="assignment-description">說明</label><textarea class="form-control" id="assignment-description" name="description"></textarea></div>
+        <div class="mb-3"><label class="form-label" for="assignment-due">截止時間（台灣時間）</label><input class="form-control" id="assignment-due" name="due_at" type="datetime-local" required></div>
+        <button class="btn btn-primary" type="submit">建立作業</button>
+      </form>
+    {% endif %}
+    {% for assignment in assignments %}
+      <article class="content-item"><h3>{{ assignment['title'] }}</h3>{% if assignment['description'] %}<p class="preserve-lines">{{ assignment['description'] }}</p>{% endif %}<small>截止：{{ assignment['due_at']|taipei_time }}</small></article>
+    {% else %}<p class="section-empty">尚無作業</p>{% endfor %}
+  </section>
+
   <section class="course-section" aria-labelledby="messages-title">
     <h2 id="messages-title">課程留言板</h2>
     <form method="post" action="{{ url_for('messages.create', course_id=course['id']) }}" class="composer">

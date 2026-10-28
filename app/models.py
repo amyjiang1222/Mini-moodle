@@ -1,12 +1,14 @@
-"""Small SQLite data layer for the five agreed Jira stories."""
+"""Small SQLite data layer for the agreed Jira stories."""
 
 import secrets
 import sqlite3
 import string
+from datetime import datetime, timedelta, timezone
 
 from flask import current_app, g
 from werkzeug.security import generate_password_hash
 
+TAIPEI = timezone(timedelta(hours=8))
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS users (
@@ -40,6 +42,14 @@ CREATE TABLE IF NOT EXISTS messages (
     course_id INTEGER NOT NULL REFERENCES courses(id),
     author_id INTEGER NOT NULL REFERENCES users(id),
     body TEXT NOT NULL CHECK (length(trim(body)) > 0),
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS assignments (
+    id INTEGER PRIMARY KEY,
+    course_id INTEGER NOT NULL REFERENCES courses(id),
+    title TEXT NOT NULL CHECK (length(trim(title)) > 0),
+    description TEXT NOT NULL DEFAULT '',
+    due_at TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 """
@@ -105,6 +115,27 @@ def create_course(name, description, teacher_id):
             if "courses.code" not in str(exc):
                 raise
     raise RuntimeError("無法產生不重複的課碼")
+
+
+def create_assignment(course_id, title, description, due_input, now=None):
+    """Store the deadline in UTC; the form's datetime-local value is Taiwan time."""
+    title = title.strip()
+    if not title or not due_input:
+        raise ValueError("作業標題與截止時間不可空白")
+    try:
+        due_local = datetime.strptime(due_input, "%Y-%m-%dT%H:%M").replace(tzinfo=TAIPEI)
+    except ValueError:
+        raise ValueError("截止時間格式不正確") from None
+    due_utc = due_local.astimezone(timezone.utc)
+    if due_utc < (now or datetime.now(timezone.utc)):
+        raise ValueError("截止時間不可早於現在")
+    db = get_db()
+    cursor = db.execute(
+        "INSERT INTO assignments (course_id, title, description, due_at) VALUES (?, ?, ?, ?)",
+        (course_id, title, description.strip(), due_utc.strftime("%Y-%m-%d %H:%M:%S")),
+    )
+    db.commit()
+    return cursor.lastrowid
 
 
 def visible_courses(user):
