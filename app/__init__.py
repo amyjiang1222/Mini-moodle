@@ -50,6 +50,14 @@ def create_app(test_config=None):
         ):
             abort(400)
 
+    @app.errorhandler(413)
+    def upload_too_large(_error):
+        """Oversized uploads fail while the CSRF check reads the form, before the view runs."""
+        flash(upload_limit_message(), "danger")
+        if request.endpoint == "assignments.submit":
+            return redirect(url_for("assignments.detail", **request.view_args))
+        return redirect(url_for("dashboard"))
+
     @app.context_processor
     def inject_csrf_token():
         if "csrf_token" not in session:
